@@ -1,94 +1,94 @@
 ## Author: jz1989@nwafu.edu.cn
-## Date: 2020-03-07
+## Date: 2020-05-22
 
 rm(list = ls())
-vnms <- "pre"  # ÐèÒª½µ³ß¶ÈµÄÆøÏó±äÁ¿vrnm,ÒÔ½µË®preÎªÀý
+vnms <- "pre"  # éœ€è¦é™å°ºåº¦çš„æ°”è±¡å˜é‡vrnm,ä»¥é™æ°´preä¸ºä¾‹
 
-# 1.½µ³ß¶È¿Õ¼ä¡¢Ê±¼ä¼°Êý¾ÝÐÅÏ¢
-lats <- c(-90,90)   # ½µ³ß¶ÈÇøÓòÎ³¶È·¶Î§(S,N)
-lons <- c(-180,180) # ½µ³ß¶ÈÇøÓò¾­¶È·¶Î§(W,E)
-yrs_mod <- c(1979,2018) # ¹Û²â(ERA)¼°Ä£Äâ(CRU)Êý¾Ý·¶Î§1979-2018
-yrs_dwn <- c(1901,1978) # ½µ³ß¶ÈÊý¾Ý(CRU)Ê±¼ä·¶Î§1901-2018
-days <- c(1,365)  # ½µ³ß¶ÈÈÕÆÚ·¶Î§
+# 1.é™å°ºåº¦ç©ºé—´ã€æ—¶é—´åŠæ•°æ®ä¿¡æ¯
+lats <- c(-90,90)   # é™å°ºåº¦åŒºåŸŸçº¬åº¦èŒƒå›´(S,N)
+lons <- c(-180,180) # é™å°ºåº¦åŒºåŸŸç»åº¦èŒƒå›´(W,E)
+yrs_mod <- c(1979,2018) # è§‚æµ‹(ERA)åŠæ¨¡æ‹Ÿ(CRU)æ•°æ®èŒƒå›´1979-2018
+yrs_dwn <- c(1901,1978) # é™å°ºåº¦æ•°æ®(CRU)æ—¶é—´èŒƒå›´1901-2018
+days <- c(1,365)  # é™å°ºåº¦æ—¥æœŸèŒƒå›´
 
-CRU_pt <- "D:/CRU"  # CRUÊý¾Ý´æ´¢Â·¾¶
-ERA_pt <- "D:/ERA"  # ERAÊý¾Ý´æ´¢Â·¾¶
+CRU_pt <- "D:/CRU"  # CRUæ•°æ®å­˜å‚¨è·¯å¾„
+ERA_pt <- "D:/ERA"  # ERAæ•°æ®å­˜å‚¨è·¯å¾„
 
-# 2.½µ³ß¶È²ÎÊý
-# ¼ÓÔØR°ü (´Ë´¦½öÁÐ³ö¹Ø¼üR°ü)
-#   qmap      ·ÖÎ»ÊýÓ³Éäºó´¦Àí
-#   splines   ÑùÌõ¹À¼Æ
+# 2.é™å°ºåº¦å‚æ•°
+# åŠ è½½RåŒ… (æ­¤å¤„ä»…åˆ—å‡ºå…³é”®RåŒ…)
+#   qmap      åˆ†ä½æ•°æ˜ å°„åŽå¤„ç†
+#   splines   æ ·æ¡ä¼°è®¡
 imp <- lapply(c("qmap","splines","raster"), require, character.only=TRUE)
-# ¼ÆËã»ñµÃ¸ß¿Õ¼ä·Ö±æÂÊERA(0.125¡ã)¸ñÍøÊý¾Ý´ý´¦ÀíÇøÓòÐÐÁÐÑ­»·µÄÆðÖ¹Î»ÖÃ
-#   CRU·Ö±æÂÊÎª0.5¡ã, ERA¸ñµã¶ÔÓ¦Î»ÖÃÐÐÁÐºÅÔÚÖ®ºóµÄÑ­»·ÖÐ¼ÆËã
-rws_era <- c(1,1440) # ERAÊý¾ÝÆðÖ¹ÐÐºÅ
-cls_era <- c(1,2880) # ERAÊý¾ÝÆðÊ¼ÁÐºÅ
-# Qmap·ÖÎ»Êý¼ÆËã²½³¤
+# è®¡ç®—èŽ·å¾—é«˜ç©ºé—´åˆ†è¾¨çŽ‡ERA(0.125Â°)æ ¼ç½‘æ•°æ®å¾…å¤„ç†åŒºåŸŸè¡Œåˆ—å¾ªçŽ¯çš„èµ·æ­¢ä½ç½®
+#   CRUåˆ†è¾¨çŽ‡ä¸º0.5Â°, ERAæ ¼ç‚¹å¯¹åº”ä½ç½®è¡Œåˆ—å·åœ¨ä¹‹åŽçš„å¾ªçŽ¯ä¸­è®¡ç®—
+rws_era <- c(1,1440) # ERAæ•°æ®èµ·æ­¢è¡Œå·
+cls_era <- c(1,2880) # ERAæ•°æ®èµ·å§‹åˆ—å·
+# Qmapåˆ†ä½æ•°è®¡ç®—æ­¥é•¿
 qstp <- 0.01
-# ²¢ÐÐµ÷ÓÃºËÊý
+# å¹¶è¡Œè°ƒç”¨æ ¸æ•°
 ncrs <- 20
 
-# 3.Êä³ö²ÎÊý
-wgs84 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # WGS84µØÀí×ø±êÏµ²ÎÊý
+# 3.è¾“å‡ºå‚æ•°
+wgs84 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # WGS84åœ°ç†åæ ‡ç³»å‚æ•°
 fsp <- .Platform$file.sep
-out_pt <- "D:/Downscale"  # Êä³öÂ·¾¶
-bv <- -9999  # ±³¾°Öµ
+out_pt <- "D:/Downscale"  # è¾“å‡ºè·¯å¾„
+bv <- -9999  # èƒŒæ™¯å€¼
 
-# 4.²¢ÐÐ»¯½µ³ß¶È
-# ÈÕÑ­»·
+# 4.å¹¶è¡ŒåŒ–é™å°ºåº¦
+# æ—¥å¾ªçŽ¯
 for (day in days[1]:days[2]) {
-  # ¶ÁÈ¡µÚdayÈÕCRUËùÓÐ¹Û²âÄêyrs_modµÄÈÕ³ß¶ÈÍø¸ñÊý¾Ý
+  # è¯»å–ç¬¬dayæ—¥CRUæ‰€æœ‰è§‚æµ‹å¹´yrs_modçš„æ—¥å°ºåº¦ç½‘æ ¼æ•°æ®
   CRU_mod_dts <- lapply(yrs_mod[1]:yrs_mod[2], FUN = function(iyr){
-    # CRU preµÚiyrÄêµÚdayÌìÊý¾ÝÎÄ¼þÃû CRU_pre_iyr_day.tif
-    CRU_mod_dt <- raster(CRU_pre_iyr_day.tif)  # Ðè¸ù¾Ý½øÒ»²½ÌáÈ¡Îªmatrix»òarray
-  })  # ´Ë´¦¼Ù¶¨ÒÑ½«listÀàÐÍ½á¹û×ª»»ÎªarrayÀàÐÍÈýÎ¬¾ØÕó
+    # CRU preç¬¬iyrå¹´ç¬¬dayå¤©æ•°æ®æ–‡ä»¶å CRU_pre_iyr_day.tif
+    CRU_mod_dt <- raster(CRU_pre_iyr_day.tif)  # éœ€æ ¹æ®è¿›ä¸€æ­¥æå–ä¸ºmatrixæˆ–array
+  })  # æ­¤å¤„å‡å®šå·²å°†listç±»åž‹ç»“æžœè½¬æ¢ä¸ºarrayç±»åž‹ä¸‰ç»´çŸ©é˜µ
   
-  # ¶ÁÈ¡µÚdayÈÕERAËùÓÐ¹Û²âÄêyrs_modµÄÈÕ³ß¶ÈÍø¸ñÊý¾Ý
+  # è¯»å–ç¬¬dayæ—¥ERAæ‰€æœ‰è§‚æµ‹å¹´yrs_modçš„æ—¥å°ºåº¦ç½‘æ ¼æ•°æ®
   ERA_obv_dts <- lapply(yrs_mod[1]:yrs_mod[2], FUN = function(iyr){
-    # ERA preµÚiyrÄêµÚdayÌìÊý¾ÝÎÄ¼þÃû ERA_pre_iyr_day.tif
-    ERA_obv_dt <- raster(ERA_pre_iyr_day.tif)  # Í¬ÉÏ
-  })  # Í¬ÉÏ
+    # ERA preç¬¬iyrå¹´ç¬¬dayå¤©æ•°æ®æ–‡ä»¶å ERA_pre_iyr_day.tif
+    ERA_obv_dt <- raster(ERA_pre_iyr_day.tif)  # åŒä¸Š
+  })  # åŒä¸Š
   
-  # ¶ÁÈ¡µÚdayÈÕCRUËùÓÐ½µ³ß¶ÈÄêyrs_dwnµÄÈÕ³ß¶ÈÍø¸ñÊý¾Ý
+  # è¯»å–ç¬¬dayæ—¥CRUæ‰€æœ‰é™å°ºåº¦å¹´yrs_dwnçš„æ—¥å°ºåº¦ç½‘æ ¼æ•°æ®
   CRU_dwn_dts <- lapply(yrs_dwn[1]:yrs_dwn[2], FUN = function(iyr){
-    # CRU preµÚiyrÄêµÚdayÌìÊý¾ÝÎÄ¼þÃû CRU_pre_iyr_day.tif
-    CRU_dwn_dt <- raster(CRU_pre_iyr_day.tif)  # Í¬ÉÏ
-  })  # Í¬ÉÏ
+    # CRU preç¬¬iyrå¹´ç¬¬dayå¤©æ•°æ®æ–‡ä»¶å CRU_pre_iyr_day.tif
+    CRU_dwn_dt <- raster(CRU_pre_iyr_day.tif)  # åŒä¸Š
+  })  # åŒä¸Š
   
-  # ÐÂ½¨¿ÕÈýÎ¬Êý×édwns_day´æ´¢µÚdayÈÕyrs_dwnËùÓÐÄê½µ³ß¶È½á¹û
+  # æ–°å»ºç©ºä¸‰ç»´æ•°ç»„dwns_dayå­˜å‚¨ç¬¬dayæ—¥yrs_dwnæ‰€æœ‰å¹´é™å°ºåº¦ç»“æžœ
   dwns_day <- array(data = NA,dim = c(diff(rws_era)+1,diff(cls_era)+1),diff(yrs_dwn)+1)
-  # ÐÐÑ­»·,»ñµÃµÚdayÈÕyrs_dwnËùÓÐÄê½µ³ß¶ÈÈýÎ¬½á¹û¾ØÕódwn_day
+  # è¡Œå¾ªçŽ¯,èŽ·å¾—ç¬¬dayæ—¥yrs_dwnæ‰€æœ‰å¹´é™å°ºåº¦ä¸‰ç»´ç»“æžœçŸ©é˜µdwn_day
   for (rw_era in rws_era) {
-    # ¼ÆËãCRU(0.5¡ã)¶ÔÓ¦ÐÐºÅ
+    # è®¡ç®—CRU(0.5Â°)å¯¹åº”è¡Œå·
     rw_cru <- ceiling(rw_era/(0.5/0.125))
-    # ÁÐÑ­»·
+    # åˆ—å¾ªçŽ¯
     for (cl_era in cls_era) {
-      # ¼ÆËãCRU(0.5¡ã)¶ÔÓ¦ÁÐºÅ
+      # è®¡ç®—CRU(0.5Â°)å¯¹åº”åˆ—å·
       cl_cru <- ceiling(cl_era/(0.5/0.125))
-      # ¶ÁÈ¡Ö¸¶¨ÐÐÁÐºÅÎ»ÖÃ¸ñµãËùÓÐÄê·ÝÈÕÊý¾Ý
+      # è¯»å–æŒ‡å®šè¡Œåˆ—å·ä½ç½®æ ¼ç‚¹æ‰€æœ‰å¹´ä»½æ—¥æ•°æ®
       CRU_mod_dt <- CRU_mod_dts[rw_cru,cl_cru,]
       ERA_obv_dt <- ERA_obv_dts[rw_era,cl_era,]
       CRU_dwn_dt <- CRU_dwn_dts[rw_cru,cl_cru,]
-      # ³¢ÊÔQmap·½·¨»ñµÃ¹Û²âÊ±¼ä¶ÎCRUÓëERA¶ÔÓ¦¹ØÏµ
+      # å°è¯•Qmapæ–¹æ³•èŽ·å¾—è§‚æµ‹æ—¶é—´æ®µCRUä¸ŽERAå¯¹åº”å…³ç³»
       try_q <- try(fit_qm <- fitQmapDIST(ERA_obv_dt,CRU_mod_dt, qstep=qstp),silent = T)
       if (class(try_q)=="try-error") {
-        # Èç¹ûQmap·½·¨²»¿ÉÐÐ,ÔòÌæ»»ÎªÈý´ÎÆ½»¬ÑùÌõÄâºÏ¹ØÏµ(cubic smoothing spline)
+        # å¦‚æžœQmapæ–¹æ³•ä¸å¯è¡Œ,åˆ™æ›¿æ¢ä¸ºä¸‰æ¬¡å¹³æ»‘æ ·æ¡æ‹Ÿåˆå…³ç³»(cubic smoothing spline)
         try_sp <- try(fit_sp <- smooth.spline(CRU_mod_dt,ERA_obv_dt),silent = T)
         if (class(try_sp)=="try-error") {
-          # Èç¹ûÉÏÊö2ÖÖ·½·¨¾ù²»¿ÉÐÐ,ÔòÊä³öNAÖµ
+          # å¦‚æžœä¸Šè¿°2ç§æ–¹æ³•å‡ä¸å¯è¡Œ,åˆ™è¾“å‡ºNAå€¼
           down_data <- rep(NA,diff(yrs_dwn)+1)
         } else {
-          # Èç¹ûÈý´ÎÆ½»¬ÑùÌõ·½·¨¿ÉÐÐ,ÔòÓÃ¸Ã·½·¨ÄâºÏ½µ³ß¶È
+          # å¦‚æžœä¸‰æ¬¡å¹³æ»‘æ ·æ¡æ–¹æ³•å¯è¡Œ,åˆ™ç”¨è¯¥æ–¹æ³•æ‹Ÿåˆé™å°ºåº¦
           down_data <- predict(fit_sp,CRU_dwn_dt)$y
         }
       } else {
-        # Èç¹ûQmap·½·¨¿ÉÐÐ,ÔòÓÃQmap»ñµÃµÄ¹ØÏµ½µ³ß¶È
+        # å¦‚æžœQmapæ–¹æ³•å¯è¡Œ,åˆ™ç”¨QmapèŽ·å¾—çš„å…³ç³»é™å°ºåº¦
         down_data <- doQmapDIST(CRU_dwn_dt, fit_qm)
       }
       dwns_day[rw_era,cl_era,] <- down_data
     }
   }
-  # Êä³ödwns_dayÃ¿²ãÈÕÊý¾Ý
+  # è¾“å‡ºdwns_dayæ¯å±‚æ—¥æ•°æ®
   for (iyr in yrs_dwn[1]:yrs_dwn[2]) {
     dwn_day1 <- dwns_day[,,(iyr-yrs_dwn[1]+1)]
     dwn_day1[is.na(dwn_day1)] <- bv
