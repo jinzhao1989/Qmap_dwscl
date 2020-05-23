@@ -25,8 +25,6 @@ rws_era <- c(1,1440) # ERA数据起止行号
 cls_era <- c(1,2880) # ERA数据起始列号
 # Qmap分位数计算步长
 qstp <- 0.01
-# 并行调用核数
-ncrs <- 20
 
 # 3.输出参数
 wgs84 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # WGS84地理坐标系参数
